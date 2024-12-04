@@ -74,5 +74,3 @@ pomo end
 - **Plucky Dependency**: This script relies on Plucky's `pluck delay` and `pluck export` commands. If these commands fail or produce invalid output, the script will not function as expected.
 - **Dynamic Break Timing**: The session's total time is calculated as the Plucky delay plus 10 minutes.
 
-## License
-
