@@ -1,76 +1,112 @@
-# Pomodoro Bash Script
+# **Pomodoro Timer with Plucky**
 
-A lightweight Bash script that integrates with **Plucky** to manage Pomodoro sessions directly from the terminal. The script leverages Plucky's scheduling and delay features to dynamically set and manage session delays and breaks.
+A lightweight Bash script for implementing the Pomodoro technique using **Plucky**. This script supports managing Pomodoro sessions and integrates with `systemd` to provide **notification reminders** during break times.
 
-## Features
+---
 
-- Start a new Pomodoro session with a delay and break time calculated dynamically.
-- Check the status of an ongoing session, including time until the next break starts or ends.
-- End an active session gracefully.
-- Break conditions are customizable to fit your preferences.
+## **Features**
 
-## Requirements
+- Automates Pomodoro session management using **Plucky**.
+- Provides **notifications** at the start of break times.
+- Fully configurable with default and custom break durations.
+- Uses `systemd` timers for reliable and precise notifications.
 
-- **Bash**: Compatible with standard Bash shells.
-- **Plucky**: Install Plucky to enable the script's functionality. Visit the [Plucky Official Website](https://getplucky.net/) for installation and documentation.
+---
 
-## Installation
+## **Usage**
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/pomodoro-bash.git
-   ```
+### **1. Start a Pomodoro**
+Start a Pomodoro session with the default break time (10 minutes):
+```bash
+pomo start
+```
 
-2. Move the script to your home directory:
-   ```bash
-   mv pomodoro-bash/pomo.sh ~/.pomo.sh
-   ```
+Start a Pomodoro session with a custom break time (e.g., 15 minutes):
+```bash
+pomo 15m start
+```
 
-3. Add the following line to your `~/.bashrc`:
-   ```bash
-   if [ -f ~/.pomo.sh ]; then
-       source ~/.pomo.sh
-   fi
-   ```
-
-4. Reload your `.bashrc`:
-   ```bash
-   source ~/.bashrc
-   ```
-
-5. Ensure Plucky is installed and configured. Refer to the [Plucky Official Website](https://getplucky.net/) for installation and usage.
-
-## Usage
-
-### Start or Check a Session
-
+### **2. Check the status**
+Check the current Pomodoro session status:
 ```bash
 pomo
 ```
 
-- **If a session is active**:
-  - Displays the time remaining until the next break starts or ends.
-- **If no session is active**:
-  - Starts a new session with the delay and break conditions based on Plucky's settings. By default, breaks are configured with `allow everything`.
-
-### End a Session
-
+### **3. End a Pomodoro**
+Manually cancel a running Pomodoro session:
 ```bash
 pomo end
 ```
 
-- Ends the current session if active.
+---
 
-## Customization
+## **Notifications**
 
-- **Break Conditions**:
-  - By default, the script uses `allow everything` for breaks. You can modify this condition in the `pomo.sh` script to better suit your needs:
-    ```bash
-    pluck when now+${total_minutes}m allow your_condition
-    ```
+- **Break notifications** are triggered using `notify-send`, ensuring timely reminders.
+- Notifications work seamlessly on **Wayland** or **X11** environments with `systemd` user services.
 
-## Notes
+---
 
-- **Plucky Dependency**: This script relies on Plucky's `pluck delay` and `pluck export` commands. If these commands fail or produce invalid output, the script will not function as expected.
-- **Dynamic Break Timing**: The session's total time is calculated as the Plucky delay plus 10 minutes.
+## **Installation**
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/your-username/pomodoro-plucky.git
+   cd pomodoro-plucky
+   ```
+
+2. Copy the scripts to your local user scripts directory:
+   ```bash
+   mkdir -p ~/.user_scripts
+   cp pomo pomo_notify ~/.user_scripts/
+   chmod +x ~/.user_scripts/pomo ~/.user_scripts/pomo_notify
+   ```
+
+3. Configure `systemd` user services:
+   ```bash
+   mkdir -p ~/.config/systemd/user
+   cp pomo-notify.service pomo-notify.timer ~/.config/systemd/user/
+   ```
+
+   > **Important**: If you are using this script under a different username, ensure the service file references the correct script path. Replace `jian` in the service file paths (e.g., `/home/jian/.user_scripts/`) with your actual username. You can edit the file using:
+   > ```bash
+   > nano ~/.config/systemd/user/pomo-notify.service
+   > ```
+
+4. Reload `systemd` user configuration:
+   ```bash
+   systemctl --user daemon-reload
+   ```
+
+5. Test the setup:
+   - Start a Pomodoro:
+     ```bash
+     pomo start
+     ```
+   - Check the timer:
+     ```bash
+     systemctl --user list-timers
+     ```
+
+---
+
+## **Requirements**
+
+- **Plucky**: Used to block distractions during focus time.
+- **notify-send**: For notifications (install via `libnotify`).
+- **systemd**: Required for managing timers and notifications.
+
+---
+
+## **License**
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+### **Notes**
+1. Make sure the `pomo-notify.service` file points to the correct user-specific script path.
+2. This project assumes you have Plucky installed and configured for focus management.
+
+---
 
