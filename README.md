@@ -13,6 +13,12 @@ A lightweight Bash script for implementing the Pomodoro technique using **Plucky
 
 ---
 
+## **About Plucky**
+
+[Plucky](https://getplucky.net/) is a powerful **self-discipline and internet blocking tool** designed to help you stay focused by blocking distracting websites or applications.
+
+---
+
 ## **Usage**
 
 ### **1. Start a Pomodoro**
@@ -92,7 +98,7 @@ pomo end
 
 ## **Requirements**
 
-- **Plucky**: Used to block distractions during focus time.
+- **Plucky**: Used to block distractions during focus time. Learn more at [https://getplucky.net/](https://getplucky.net/).
 - **notify-send**: For notifications (install via `libnotify`).
 - **systemd**: Required for managing timers and notifications.
 
@@ -107,6 +113,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ### **Notes**
 1. Make sure the `pomo-notify.service` file points to the correct user-specific script path.
 2. This project assumes you have Plucky installed and configured for focus management.
-
----
 
