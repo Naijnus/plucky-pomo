@@ -1,0 +1,136 @@
+#!/bin/bash
+
+SYSTEMD_SERVICE="$HOME/.config/systemd/user/pomo-notify.service"
+SYSTEMD_TIMER="$HOME/.config/systemd/user/pomo-notify.timer"
+NOTIFY_SCRIPT="$HOME/.user_scripts/pomo_notify"
+
+# Helper function: Check for active Pomodoro
+check_active_pomodoro() {
+    local future_output=$(pluck future)
+    if echo "$future_output" | grep -q "allow everything"; then
+        echo "$future_output" | grep "allow everything" | head -n 1
+    else
+        echo ""
+    fi
+}
+
+# Quiet wrapper for systemctl commands
+quiet_systemctl() {
+    local action=$1
+    local unit=$2
+    systemctl --user $action $unit >/dev/null 2>&1
+}
+
+# Schedule break notification
+schedule_break_notification() {
+    local break_start_datetime=$1
+    local systemd_datetime=$(date -d "$break_start_datetime" +"%Y-%m-%d %H:%M:%S")
+    sed -i "s|^OnCalendar=.*|OnCalendar=$systemd_datetime|" "$SYSTEMD_TIMER"
+    systemctl --user daemon-reload
+    quiet_systemctl enable pomo-notify.timer
+    quiet_systemctl restart pomo-notify.timer
+}
+
+# Cancel break notification
+cancel_break_notification() {
+    quiet_systemctl stop pomo-notify.timer
+    quiet_systemctl disable pomo-notify.timer
+}
+
+# Main function: Pomodoro operations
+pomo() {
+    local command=$1
+    local option=$2
+
+    if [ "$command" == "" ]; then
+        # Check current Pomodoro status
+        local active_line=$(check_active_pomodoro)
+        if [ -n "$active_line" ]; then
+            local timestamp=$(echo "$active_line" | awk '{print $1, $2}')
+            local current_time=$(date +%s)
+            local future_time=$(date -d "$timestamp" +%s)
+            local remaining_seconds=$((future_time - current_time))
+
+            if echo "$active_line" | grep -q "+"; then
+                echo "Focus time is active. Time left until break begins: $((remaining_seconds / 60))m $((remaining_seconds % 60))s."
+            else
+                echo "Break time is active. Time left until break ends: $((remaining_seconds / 60))m $((remaining_seconds % 60))s."
+            fi
+        else
+            echo "No active Pomodoro running."
+            # Automatically cancel notification service if no active Pomodoro
+            cancel_break_notification
+        fi
+        return 0
+    elif [ "$command" == "start" ]; then
+        # Check for active Pomodoro
+        local active_line=$(check_active_pomodoro)
+        if [ -n "$active_line" ]; then
+            echo "Error: A Pomodoro is already running. Please end the current Pomodoro before starting a new one."
+            return 1
+        fi
+
+        # Determine focus and break time
+        local break_time=10
+        local focus_duration=$(pluck delay)
+        local focus_minutes=$((focus_duration / 60))
+        local total_minutes=$((focus_minutes + break_time))
+
+        # Start a new Pomodoro
+        pluck when now+${total_minutes}m allow everything
+        echo "Pomodoro started with ${focus_minutes} minutes of focus and ${break_time} minutes of break."
+
+        # Schedule a notification for break start
+        schedule_break_notification "now + ${focus_minutes} minutes"
+        return 0
+    elif [[ "$command" =~ ^[0-9]+m$ ]] && [ "$option" == "start" ]; then
+        # Check for active Pomodoro
+        local active_line=$(check_active_pomodoro)
+        if [ -n "$active_line" ]; then
+            echo "Error: A Pomodoro is already running. Please end the current Pomodoro before starting a new one."
+            return 1
+        fi
+
+        # Determine focus and custom break time
+        local custom_break_time=${command%m}
+        local focus_duration=$(pluck delay)
+        local focus_minutes=$((focus_duration / 60))
+        local total_minutes=$((focus_minutes + custom_break_time))
+
+        # Start a new Pomodoro
+        pluck when now+${total_minutes}m allow everything
+        echo "Pomodoro started with ${focus_minutes} minutes of focus and ${custom_break_time} minutes of break."
+
+        # Schedule a notification for break start
+        schedule_break_notification "now + ${focus_minutes} minutes"
+        return 0
+    elif [ "$command" == "end" ]; then
+        # Cancel the running Pomodoro
+        local active_line=$(check_active_pomodoro)
+        if [ -n "$active_line" ]; then
+            local when_command=$(echo "$active_line" | awk -F 'when ' '{print $2}')
+            pluck - "when $when_command"
+            echo "Pomodoro cancelled."
+
+            # Cancel the scheduled notification
+            cancel_break_notification
+            return 0
+        else
+            echo "Error: No active Pomodoro to cancel."
+            return 1
+        fi
+    else
+        # Invalid command
+        echo "Error: Invalid command."
+        echo "Usage:"
+        echo "  pomo                - Check the current Pomodoro status."
+        echo "  pomo start          - Start a Pomodoro with a default 10-minute break."
+        echo "  pomo Xm start       - Start a Pomodoro with a custom X-minute break (e.g., pomo 15m start)."
+        echo "  pomo end            - Cancel the running Pomodoro."
+        return 1
+    fi
+}
+
+# Call pomo function with arguments
+pomo "$@"
+

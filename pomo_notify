@@ -1,0 +1,3 @@
+#!/bin/bash
+notify-send "Pomodoro Timer" "Break time has started. Enjoy your break!"
+
