@@ -90,10 +90,6 @@ pomo end
 - **notify-send**: For notifications (install via `libnotify`).
 - **systemd**: Required for managing timers and notifications.
 
-## **License**
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ### **Notes**
 1. Make sure the `pomo-notify.service` file points to the correct user-specific script path.
 2. This project assumes you have Plucky installed and configured for focus management.
