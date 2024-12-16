@@ -2,8 +2,6 @@
 
 A lightweight Bash script for implementing the Pomodoro technique using **Plucky**. This script supports managing Pomodoro sessions and integrates with `systemd` to provide **notification reminders** during break times.
 
----
-
 ## **Features**
 
 - Automates Pomodoro session management using **Plucky**.
@@ -11,13 +9,9 @@ A lightweight Bash script for implementing the Pomodoro technique using **Plucky
 - Fully configurable with default and custom break durations.
 - Uses `systemd` timers for reliable and precise notifications.
 
----
-
 ## **About Plucky**
 
 [Plucky](https://getplucky.net/) is a powerful **self-discipline and internet blocking tool** designed to help you stay focused by blocking distracting websites or applications.
-
----
 
 ## **Usage**
 
@@ -44,14 +38,10 @@ Manually cancel a running Pomodoro session:
 pomo end
 ```
 
----
-
 ## **Notifications**
 
 - **Break notifications** are triggered using `notify-send`, ensuring timely reminders.
 - Notifications work seamlessly on **Wayland** or **X11** environments with `systemd` user services.
-
----
 
 ## **Installation**
 
@@ -94,21 +84,15 @@ pomo end
      systemctl --user list-timers
      ```
 
----
-
 ## **Requirements**
 
 - **Plucky**: Used to block distractions during focus time. Learn more at [https://getplucky.net/](https://getplucky.net/).
 - **notify-send**: For notifications (install via `libnotify`).
 - **systemd**: Required for managing timers and notifications.
 
----
-
 ## **License**
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
 
 ### **Notes**
 1. Make sure the `pomo-notify.service` file points to the correct user-specific script path.
