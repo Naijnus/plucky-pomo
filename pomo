@@ -1,8 +1,6 @@
 #!/bin/bash
 
-SYSTEMD_SERVICE="$HOME/.config/systemd/user/pomo-notify.service"
 SYSTEMD_TIMER="$HOME/.config/systemd/user/pomo-notify.timer"
-NOTIFY_SCRIPT="$HOME/.user_scripts/pomo_notify"
 
 # Helper function: Check for active Pomodoro
 check_active_pomodoro() {
@@ -122,11 +120,6 @@ pomo() {
     else
         # Invalid command
         echo "Error: Invalid command."
-        echo "Usage:"
-        echo "  pomo                - Check the current Pomodoro status."
-        echo "  pomo start          - Start a Pomodoro with a default 10-minute break."
-        echo "  pomo Xm start       - Start a Pomodoro with a custom X-minute break (e.g., pomo 15m start)."
-        echo "  pomo end            - Cancel the running Pomodoro."
         return 1
     fi
 }
